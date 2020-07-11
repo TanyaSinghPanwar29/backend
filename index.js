@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { connectToDb, createUser, signInUser } = require('./database')
+const { initializeDatabase, registerUser } = require('./firebaseConfig')
+const { RESPONSE_MODALS } = require('./ResponseModels/responseModels')
 
 app.use(bodyParser.json());
 app.use(cors({
@@ -10,23 +11,31 @@ app.use(cors({
     'origin': '*',
     'preflightContinue': true
   }));
+
 const port = 3000 || process.env.PORT;
 
+const initServer = () => {
+    initializeDatabase();
+}
+
+initServer();
+
 app.post("/api/createUser",(req,res)=>{
-   createUser(req.body.email,req.body.password);
    res.set('Access-Control-Allow-Origin','*');
-   res.json({
-       message: "USER REGISTERED"
+   registerUser(req.body.email,req.body.password)
+   .then((res)=> {
+    res.json(RESPONSE_MODALS.userRegistered.success);
+   })
+   .catch((err)=> {
+    res.json(RESPONSE_MODALS.userRegistered.failed);
    })
 });
 
-app.post("/api/signIn", async (req,res)=>{
-    res.set('Access-Control-Allow-Origin','*');
-    let resPonse = await signInUser(req.body.email,req.body.password);
-    res.json(resPonse);
- });
-
-connectToDb();
+// app.post("/api/signIn", async (req,res)=>{
+//     res.set('Access-Control-Allow-Origin','*');
+//     let resPonse = await signInUser(req.body.email,req.body.password);
+//     res.json(resPonse);
+//  });
 
 app.listen(port,()=>{
     console.log("The server is running at port "+port);

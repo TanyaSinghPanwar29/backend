@@ -10,8 +10,7 @@ app.post("/api/createUser",(req,res)=>{
    createUser(req.body.email,req.body.password);
    res.send("User Created");
 });
-
-
+ 
 connectToDb();
 
 app.listen(port,()=>{

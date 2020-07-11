@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { connectToDb, createUser } = require('./database')
+const { connectToDb, createUser, signInUser } = require('./database')
 
 app.use(bodyParser.json());
 app.use(cors({
@@ -19,7 +19,13 @@ app.post("/api/createUser",(req,res)=>{
        message: "USER REGISTERED"
    })
 });
- 
+
+app.post("/api/signIn", async (req,res)=>{
+    res.set('Access-Control-Allow-Origin','*');
+    let resPonse = await signInUser(req.body.email,req.body.password);
+    res.json(resPonse);
+ });
+
 connectToDb();
 
 app.listen(port,()=>{

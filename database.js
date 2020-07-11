@@ -28,6 +28,14 @@ const createUser = (email,password) => {
     runQuery(query,values);
 }
 
+const signInUser = (email,password) => {
+    let values = [email,password];
+    let query = 'SELECT email, password FROM users WHERE email == $1';
+    client.query(query,values, (err, res) => {
+        console.log(err,res);
+      })
+}
+
 const connectToDb = () => {
     client.connect();
 }
@@ -47,3 +55,4 @@ exports.connectToDb = connectToDb;
 exports.runQuery = runQuery;
 exports.disconnectFromDb = disconnectFromDb;
 exports.createUser = createUser;
+exports.signInUser = signInUser;

@@ -19,9 +19,8 @@ app.post("/api/createUser",(req,res)=>{
        message: "USER REGISTERED"
    })
 });
-
-
- connectToDb();
+ 
+connectToDb();
 
 app.listen(port,()=>{
     console.log("The server is running at port "+port);

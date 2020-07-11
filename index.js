@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const admin = require('firebase-admin');
+const { auth } = require('firebase-admin');
 const { initializeDatabase, registerUser } = require('./firebaseConfig')
 const { RESPONSE_MODALS } = require('./ResponseModels/responseModels')
 
@@ -23,10 +25,11 @@ initServer();
 app.post("/api/createUser",(req,res)=>{
    res.set('Access-Control-Allow-Origin','*');
    registerUser(req.body.email,req.body.password)
-   .then((res)=> {
-    res.json(RESPONSE_MODALS.userRegistered.success);
+   .then((response)=> {
+       res.json(RESPONSE_MODALS.userRegistered.success);
    })
    .catch((err)=> {
+       console.log(err);
     res.json(RESPONSE_MODALS.userRegistered.failed);
    })
 });

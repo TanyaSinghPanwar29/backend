@@ -1,9 +1,10 @@
 const admin = require('firebase-admin');
 const { auth } = require('firebase-admin');
+const serviceAccount = require('./chatbox-dfb88-firebase-adminsdk-lweu3-df3ed3f7ec.json');
 
 const initializeDatabase = () => {
     admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
+        credential: admin.credential.cert(serviceAccount),
         databaseURL: 'https://chatbox-dfb88.firebaseio.com/'
     });
 }

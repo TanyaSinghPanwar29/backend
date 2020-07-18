@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
-const { auth } = require('firebase-admin');
 const serviceAccount = require('./chatbox-dfb88-firebase-adminsdk-lweu3-df3ed3f7ec.json');
+const { getFilteredEmail } = require('./Utils/Utils');
+const { RESPONSE_MODALS } = require('./ResponseModels/responseModels')
 
 const initializeDatabase = () => {
     admin.initializeApp({
@@ -10,18 +11,46 @@ const initializeDatabase = () => {
 }
 
 const registerUser = async (email,password) => {
+    try{
+    await admin.database().ref("users/"+getFilteredEmail(email)).set({
+        email: email,
+        password: password
+    }); 
+    } catch(err){
+     return Promise.reject(new Error('fail'));
+    }
     return  await admin.auth().createUser({
         email: email,
         emailVerified: false,
         password: password
       });
   }
-  
-const loginUser = async (email,password) => {
-return await admin.auth().getUserByEmail(email)
-.then((userRecord)=>{
-    console.log(userRecord.toJSON());
-}).catch(err=> err);
+
+const loginUser = async (req,res) => {
+    if(!res || !req || !req.body || !req.body.email || !req.body.password){
+        res.json(RESPONSE_MODALS.loggedIn.failed);
+    }
+    
+
+    let email = req.body.email;
+    let password = req.body.password;
+    
+    try{
+       admin.database().ref("users/"+getFilteredEmail(email)).orderByValue()
+        .on("value",(snapshot)=>{
+            let data = snapshot.val();
+            if(!data)
+            res.json(RESPONSE_MODALS.loggedIn.user_not_found);
+            
+            if(data.password === password){
+                res.json(RESPONSE_MODALS.loggedIn.success);
+            } else{
+                res.json(RESPONSE_MODALS.loggedIn.failed);
+            }
+        });
+    } catch(err){
+        res.json(RESPONSE_MODALS.loggedIn.failed);
+    }
 }
 
 exports.initializeDatabase = initializeDatabase;

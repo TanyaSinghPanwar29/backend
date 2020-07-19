@@ -1,3 +1,6 @@
+const { generateToken } = require('../Authentication/jwt-service');
+const { response } = require('express');
+
 const RESPONSE_MODALS = {
     userRegistered: {
         success: {
@@ -12,7 +15,7 @@ const RESPONSE_MODALS = {
     loggedIn: {
         success: {
             success: true,
-            message: "Authorized"
+            message: "Authorized",
             },
             failed: {
             success: false,
@@ -21,7 +24,10 @@ const RESPONSE_MODALS = {
             user_not_found: {
                 success: false,
                 message: "User not found"
-
+            },
+            invalidData:{
+                success: false,
+                message: "Invalid Parameters"
             }
     }
 }
@@ -44,5 +50,14 @@ const getJWTTokenPayLoad = (email) => {
     return payLoad;
 }
 
+const getSuccessfulLoginResponse = (email) => {
+    let response = {
+        ...RESPONSE_MODALS.loggedIn.success,
+        token: generateToken(getJWTTokenPayLoad(email))
+    }
+    return response;
+}
+
 exports.RESPONSE_MODALS = RESPONSE_MODALS;
 exports.getJWTTokenPayLoad = getJWTTokenPayLoad;
+exports.getSuccessfulLoginResponse = getSuccessfulLoginResponse;

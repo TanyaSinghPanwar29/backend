@@ -34,6 +34,11 @@ const registerUser = async (req,res) => {
                     password: password
                 }).then(userCreated =>{
                     res.json(RESPONSE_MODALS.userRegistered.success)
+                    admin.database().ref("users/"+getFilteredEmail(email)).set({
+                        email: email,
+                        password: password,
+                        hasUpdatedProfile: false
+                    })
                 }).catch((err)=>{
                     res.json(RESPONSE_MODALS.userRegistered.failed);
                     return;

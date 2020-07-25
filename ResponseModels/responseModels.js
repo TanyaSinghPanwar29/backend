@@ -10,6 +10,10 @@ const RESPONSE_MODALS = {
         failed: {
         success: false,
         message: "Unable to register user"
+        },
+        userAlreadyExist: {
+            success: false,
+            message: "User already exists"
         }
     },
     loggedIn: {
@@ -29,7 +33,19 @@ const RESPONSE_MODALS = {
                 success: false,
                 message: "Invalid Parameters"
             }
+
+    },
+    profileUpdate :{
+        success:{
+            success: true,
+            message: "User updated", 
+        },
+        failed:{
+            success: false,
+            message: "Details could not be updates..."
+        }
     }
+
 }
 
 const getJWTTokenPayLoad = (email) => {

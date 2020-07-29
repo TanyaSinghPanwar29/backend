@@ -66,10 +66,11 @@ const getJWTTokenPayLoad = (email) => {
     return payLoad;
 }
 
-const getSuccessfulLoginResponse = (email) => {
+const getSuccessfulLoginResponse = (email, isupdated) => {
     let response = {
         ...RESPONSE_MODALS.loggedIn.success,
-        token: generateToken(getJWTTokenPayLoad(email))
+        token: generateToken(getJWTTokenPayLoad(email)),
+        isUpdated : isupdated
     }
     return response;
 }

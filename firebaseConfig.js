@@ -67,7 +67,8 @@ const loginUser = async (req,res) => {
             }
         
             if(data && data.password === password && email === data.email){
-                res.json(getSuccessfulLoginResponse(email));
+                res.json(getSuccessfulLoginResponse(email,data.hasUpdatedProfile));
+                
             } else{
                 res.json(RESPONSE_MODALS.loggedIn.failed);
             }
@@ -89,8 +90,8 @@ const updateProfileInfo = async (req,res) => {
         first_Name : req.body.first_Name,
         last_Name : req.body.last_Name,
         location: req.body.location,
-        description: req.body.description
-        
+        description: req.body.description,
+        hasUpdatedProfile: true
     }
 
     let payLoad = getDecodedPayload(req.body.token);

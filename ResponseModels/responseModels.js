@@ -4,12 +4,12 @@ const { response } = require('express');
 const RESPONSE_MODALS = {
     userRegistered: {
         success: {
-        success: true,
-        message: "User has been created"
+            success: true,
+            message: "User has been created"
         },
         failed: {
-        success: false,
-        message: "Unable to register user"
+            success: false,
+            message: "Unable to register user"
         },
         userAlreadyExist: {
             success: false,
@@ -20,43 +20,54 @@ const RESPONSE_MODALS = {
         success: {
             success: true,
             message: "Authorized",
-            },
-            failed: {
+        },
+        failed: {
             success: false,
             message: "Invalid Credentials"
-            },
-            user_not_found: {
-                success: false,
-                message: "User not found"
-            },
-            invalidData:{
-                success: false,
-                message: "Invalid Parameters"
-            }
+        },
+        user_not_found: {
+            success: false,
+            message: "User not found"
+        },
+        invalidData: {
+            success: false,
+            message: "Invalid Parameters"
+        }
 
     },
-    profileUpdate :{
-        success:{
+    profileUpdate: {
+        success: {
             success: true,
-            message: "User updated", 
+            message: "User updated",
         },
-        failed:{
+        failed: {
             success: false,
             message: "Details could not be updates..."
         }
+    },
+    search: {
+        success: {
+            success: true,
+            message: "Results"
+        },
+        failed: {
+            success: false,
+            message: "NO Results found..."
+        }
+
     }
 
 }
 
 const getJWTTokenPayLoad = (email) => {
-    if(!email)
-    return null;
+    if (!email)
+        return null;
 
     let date = new Date();
-    let time = date.toISOString().split('T')[0]+" "+date.getHours()+":"
-    +(date.getMinutes().toString().length === 1 ? "0" : "")
-    +date.getMinutes().toString()
-    +":"+date.getSeconds();
+    let time = date.toISOString().split('T')[0] + " " + date.getHours() + ":"
+        + (date.getMinutes().toString().length === 1 ? "0" : "")
+        + date.getMinutes().toString()
+        + ":" + date.getSeconds();
 
     const payLoad = {
         email: email,
@@ -69,8 +80,9 @@ const getJWTTokenPayLoad = (email) => {
 const getSuccessfulLoginResponse = (email, isupdated) => {
     let response = {
         ...RESPONSE_MODALS.loggedIn.success,
+        email:email,
         token: generateToken(getJWTTokenPayLoad(email)),
-        isUpdated : isupdated
+        isUpdated: isupdated
     }
     return response;
 }

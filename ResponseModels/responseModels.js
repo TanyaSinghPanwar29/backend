@@ -55,6 +55,16 @@ const RESPONSE_MODALS = {
             message: "NO Results found..."
         }
 
+    },
+    userInfo:{
+        success:{
+            success: true,
+            message: "user details found"
+        },
+        failed:{
+            success: false,
+            message: "No result found"
+        }
     }
 
 }

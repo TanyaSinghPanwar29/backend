@@ -4,7 +4,7 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
-const { initializeDatabase, registerUser , loginUser , updateProfileInfo, search } = require('./firebaseConfig')
+const { initializeDatabase, registerUser , loginUser , updateProfileInfo, search , userInfo } = require('./firebaseConfig')
 const { RESPONSE_MODALS } = require('./ResponseModels/responseModels')
 
 app.use(bodyParser.json());
@@ -39,6 +39,10 @@ app.post("/api/update-profile",(req,res) => {
 app.post("/api/search" ,(req, res) =>{
     search(req ,res);
 } ) 
+
+app.get("/api/userInfo" , (req,res) =>{
+    userInfo(req, res);
+})
 
 let server = app.listen(port,()=>{
     console.log("The server is running at port "+port);

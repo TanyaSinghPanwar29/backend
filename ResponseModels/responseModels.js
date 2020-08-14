@@ -79,11 +79,21 @@ const RESPONSE_MODALS = {
     userStatus:{
         success:{
             success: true,
-            message: "Already your contact"
+            message: "contact status determined"
         },
         failed:{
             success: false,
             message: "can't determine..."
+        }
+    },
+    friendRequest: {
+        accepted: {
+            success: true,
+            message: "Friend Request Accepted"
+        },
+        rejected: {
+            success: false,
+            message: "Friend Request rejected"
         }
     }
 

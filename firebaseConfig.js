@@ -4,6 +4,7 @@ const { Utils } = require('./Utils/Utils');
 const { RESPONSE_MODALS, getSuccessfulLoginResponse } = require('./ResponseModels/responseModels')
 const { getDecodedPayload } = require('./Authentication/jwt-service');
 const { text } = require('body-parser');
+const { request } = require('express');
 
 const initializeDatabase = () => {
     admin.initializeApp({
@@ -62,8 +63,6 @@ const loginUser = async (req, res) => {
     }
     let username = req.body.username;
     let password = req.body.password;
-    console.log(username)
-    console.log(req.body)
     admin.database().ref("users/" + username).orderByValue()
         .once("value").then((snapshot) => {
             let data = snapshot.val();
@@ -71,8 +70,6 @@ const loginUser = async (req, res) => {
                 res.json(RESPONSE_MODALS.loggedIn.user_not_found)
                 return;
             }
-            console.log(data)
-            console.log(req.body)
             if (data && data.password === password && username === data.username) {
                 res.json(getSuccessfulLoginResponse(data.email, data.hasUpdatedProfile));
 
@@ -103,7 +100,6 @@ const updateProfileInfo = async (req, res) => {
 
     // let payLoad = getDecodedPayload(req.body.token);
     await admin.database().ref("users/" + req.body.username).orderByValue().once("value").then(async (data) => {
-        console.log(data.val())
         if (data.val()) {
             await admin.database().ref("users/" + req.body.username).update(update_payload)
                 .then(() => {
@@ -162,7 +158,6 @@ const search = async (req, res) => {
 
 
 const userInfo = async (req, res) => {
-    console.log(req.query.username)
     if (!req || !res || !req.query || !req.query.username) {
         res.json(RESPONSE_MODALS.userInfo.failed)
         return;
@@ -196,7 +191,6 @@ const userInfo = async (req, res) => {
 
 
 const friendRequest = (req, res) => {
-
     if (!req || !res || !req.body) {
         res.json(RESPONSE_MODALS.friendRequest.failed)
         return;
@@ -235,7 +229,6 @@ const userStatus = (req, res) => {
                 .orderByValue()
                 .once("value")
                 .then((snap) => {
-                    console.log(snap.val())
                     var data = snap.val()
                     if (data) {
                         res.json({
@@ -244,11 +237,25 @@ const userStatus = (req, res) => {
                         })
                         return;
                     } else if(!data){
-                        res.json({
-                            ...RESPONSE_MODALS.userStatus.success,
-                            not_a_contact: true
+
+                        admin.database().ref("users/" + friend_request.sender + "/friend_requests_received/" + friend_request.receiver)
+                        .orderByValue().once("value")
+                        .then((snapshot)=> {
+                            let data = snapshot.val();
+                            if(!data){
+                                res.json({
+                                    ...RESPONSE_MODALS.userStatus.success,
+                                    not_a_contact: true
+                                })
+                                return;
+                            } else if(data) {
+                                res.json({
+                                    ...RESPONSE_MODALS.userStatus.success,
+                                    request_received: true
+                                })
+                                return;
+                            }
                         })
-                        return;
                     }
                 })
         } else if(data){
@@ -262,7 +269,44 @@ const userStatus = (req, res) => {
 
 }
 
+handleFriendRequest = (req,res) => {
+    if(!req || !res || !req.body){
+        return;
+    }
 
+    let requestPayload = {
+        sender: req.body.sender,
+        receiver: req.body.receiver
+    }
+
+    if(req.body.accepted){
+        admin.database().ref("users/"+requestPayload.sender+"/friends/"+requestPayload.receiver)
+        .set({
+            createdAt: new Date().toISOString()
+        }).then(() => {
+            admin.database().ref("users/"+requestPayload.sender+"/friend_requests_sent/").child(requestPayload.receiver)
+            .remove();
+        });
+
+        admin.database().ref("users/"+requestPayload.receiver+"/friends/"+requestPayload.sender)
+        .set({
+            createdAt: new Date().toISOString()
+        }).then(() => {
+            admin.database().ref("users/"+requestPayload.receiver+"/friend_requests_received/").child(requestPayload.sender)
+            .remove();
+            res.json(RESPONSE_MODALS.friendRequest.accepted);
+            return;
+        });
+    } else if(!req.body.accepted){
+        admin.database().ref("users/"+requestPayload.sender+"/friend_requests_sent/").child(requestPayload.receiver)
+        .remove();
+        admin.database().ref("users/"+requestPayload.receiver+"/friend_requests_received/").child(requestPayload.sender)
+            .remove();
+        res.json(RESPONSE_MODALS.friendRequest.rejected);
+        return;
+    }
+
+}
 
 exports.initializeDatabase = initializeDatabase;
 exports.loginUser = loginUser;
@@ -273,7 +317,7 @@ exports.firesbase = admin;
 exports.userInfo = userInfo;
 exports.friendRequest = friendRequest;
 exports.userStatus = userStatus;
-
+exports.handleFriendRequest = handleFriendRequest;
 
 
 

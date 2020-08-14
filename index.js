@@ -4,7 +4,9 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
-const { initializeDatabase, registerUser , loginUser , updateProfileInfo, search , userInfo, friendRequest, userStatus } = require('./firebaseConfig')
+const { initializeDatabase, registerUser , loginUser , updateProfileInfo,
+       search , userInfo, friendRequest, userStatus,
+       handleFriendRequest } = require('./firebaseConfig')
 const { RESPONSE_MODALS } = require('./ResponseModels/responseModels')
 
 app.use(bodyParser.json());
@@ -48,6 +50,10 @@ app.post("/api/userStatus" ,(req,res) => {
 })
 app.post("/api/friendRequest",(req,res) => {
      friendRequest(req,res)
+})
+
+app.post("/api/handleFriendRequest",(req,res) => {
+  handleFriendRequest(req,res)
 })
 
 let server = app.listen(port,()=>{

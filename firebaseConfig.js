@@ -12,7 +12,6 @@ const initializeDatabase = () => {
     });
 }
 
-
 const registerUser = async (req, res) => {
     if (!res || !req || !req.body || !req.body.email || !req.body.password || !req.body.username) {
         res.json(RESPONSE_MODALS.userRegistered.failed);
@@ -24,6 +23,7 @@ const registerUser = async (req, res) => {
     admin.database().ref("users/" + username).orderByValue()
         .once("value").then(snapshot => {
             let data = snapshot.val();
+
             if (data) {
                 res.json(RESPONSE_MODALS.userRegistered.userAlreadyExist)
                 return;
@@ -37,10 +37,12 @@ const registerUser = async (req, res) => {
                     res.json(RESPONSE_MODALS.userRegistered.success);
 
                     admin.database().ref("users/" + username).set({
+
                         email: email,
                         password: password,
                         hasUpdatedProfile: false,
-                        username: username
+                        username: username,
+
                     })
 
 
@@ -95,8 +97,10 @@ const updateProfileInfo = async (req, res) => {
         last_Name: req.body.last_Name,
         location: req.body.location,
         description: req.body.description,
-        hasUpdatedProfile: true
+        hasUpdatedProfile: true,
+
     }
+
     // let payLoad = getDecodedPayload(req.body.token);
     await admin.database().ref("users/" + req.body.username).orderByValue().once("value").then(async (data) => {
         console.log(data.val())
@@ -125,7 +129,7 @@ const search = async (req, res) => {
     }
     let search_results = [];
     let searchText = req.body.text;
-    admin.database().ref('/users').orderByValue().once('value').then( (snapshot) => {
+    admin.database().ref('/users').orderByValue().once('value').then((snapshot) => {
         let data = snapshot.val();
         for (let u in data) {
             if (search_results.length >= 10)
@@ -163,33 +167,103 @@ const userInfo = async (req, res) => {
         res.json(RESPONSE_MODALS.userInfo.failed)
         return;
     }
-    
+
     let username = req.query.username;
-    
-    admin.database().ref("users/"+ username).orderByValue().once("value").then( (snapshot) => {
+    admin.database().ref("users/" + username).orderByValue().once("value").then((snapshot) => {
         let data = snapshot.val();
-        if(data){
+        if (data) {
             let response = {
                 first_Name: data.first_Name,
                 last_Name: data.last_Name,
                 location: data.location,
                 description: data.description,
                 email: data.email
-             }
-           res.json({
-               ...RESPONSE_MODALS.userInfo.success,
-               ...response
-        })
-        return
- }
-        if(!data){
+            }
+            res.json({
+                ...RESPONSE_MODALS.userInfo.success,
+                ...response
+            })
+            return
+        }
+        if (!data) {
             res.json(RESPONSE_MODALS.userInfo.failed);
             return
-        } 
-        
+        }
+
     })
 
 }
+
+
+const friendRequest = (req, res) => {
+
+    if (!req || !res || !req.body) {
+        res.json(RESPONSE_MODALS.friendRequest.failed)
+        return;
+    }
+    var friend_request = {
+        sender: req.body.sender,
+        receiver: req.body.receiver,
+    }
+    admin.database().ref("users/" + friend_request.receiver + "/friend_requests_received/" + friend_request.sender)
+        .push(friend_request)
+        .then(() => {
+            res.json(RESPONSE_MODALS.friendRequest.success)
+            return;
+        }).catch(() => {
+            res.json(RESPONSE_MODALS.friendRequest.failed)
+            return;
+        })
+
+    admin.database().ref("users/" + friend_request.sender + "/friend_requests_sent/" + friend_request.receiver)
+        .push(friend_request);
+}
+const userStatus = (req, res) => {
+    if (!req || !res || !req.body) {
+        res.json(RESPONSE_MODALS.userStatus.failed)
+        return;
+    }
+    var friend_request = {
+        sender: req.body.sender,
+        receiver: req.body.receiver,
+    }
+    admin.database().ref("users/" + req.body.sender + "/friends/" + req.body.receiver).orderByValue().once("value").then((snapshot) => {
+        let data = snapshot.val();
+        if (!data) {
+
+            admin.database().ref("users/" + friend_request.sender + "/friend_requests_sent/" + friend_request.receiver)
+                .orderByValue()
+                .once("value")
+                .then((snap) => {
+                    console.log(snap.val())
+                    var data = snap.val()
+                    if (data) {
+                        res.json({
+                            ...RESPONSE_MODALS.userStatus.success,
+                            request_sent: true
+                        })
+                        return;
+                    } else if(!data){
+                        res.json({
+                            ...RESPONSE_MODALS.userStatus.success,
+                            not_a_contact: true
+                        })
+                        return;
+                    }
+                })
+        } else if(data){
+            res.json({
+                ...RESPONSE_MODALS.userStatus.success,
+                already_a_contact: true
+            });
+            return;
+        }
+    })
+
+}
+
+
+
 exports.initializeDatabase = initializeDatabase;
 exports.loginUser = loginUser;
 exports.registerUser = registerUser;
@@ -197,3 +271,10 @@ exports.updateProfileInfo = updateProfileInfo;
 exports.search = search;
 exports.firesbase = admin;
 exports.userInfo = userInfo;
+exports.friendRequest = friendRequest;
+exports.userStatus = userStatus;
+
+
+
+
+

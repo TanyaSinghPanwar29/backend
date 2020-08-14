@@ -65,6 +65,26 @@ const RESPONSE_MODALS = {
             success: false,
             message: "No result found"
         }
+    },
+    friendRequest:{
+        success:{
+            success: true,
+            message: "Friend request send"
+        },
+        failed:{
+            success: false,
+            message: "failed to send request"
+        }
+    },
+    userStatus:{
+        success:{
+            success: true,
+            message: "Already your contact"
+        },
+        failed:{
+            success: false,
+            message: "can't determine..."
+        }
     }
 
 }

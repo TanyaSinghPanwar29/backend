@@ -86,7 +86,7 @@ const RESPONSE_MODALS = {
             message: "can't determine..."
         }
     },
-    friendRequest: {
+    handlefriendRequest: {
         accepted: {
             success: true,
             message: "Friend Request Accepted"
@@ -94,6 +94,16 @@ const RESPONSE_MODALS = {
         rejected: {
             success: false,
             message: "Friend Request rejected"
+        }
+    },
+    getUserFriends:{
+        success:{
+            success: true,
+            message: "user Friends Found"
+        },
+        rejected:{
+            success: false,
+            message: "no Friends Found"
         }
     }
 

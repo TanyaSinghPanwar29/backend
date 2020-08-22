@@ -5,6 +5,7 @@ const { RESPONSE_MODALS, getSuccessfulLoginResponse } = require('./ResponseModel
 const { getDecodedPayload } = require('./Authentication/jwt-service');
 const { text } = require('body-parser');
 const { request } = require('express');
+const { auth } = require('firebase-admin');
 
 const initializeDatabase = () => {
     admin.initializeApp({
@@ -212,6 +213,9 @@ const friendRequest = (req, res) => {
     admin.database().ref("users/" + friend_request.sender + "/friend_requests_sent/" + friend_request.receiver)
         .push(friend_request);
 }
+
+
+
 const userStatus = (req, res) => {
     if (!req || !res || !req.body) {
         res.json(RESPONSE_MODALS.userStatus.failed)
@@ -269,10 +273,11 @@ const userStatus = (req, res) => {
 
 }
 
-handleFriendRequest = (req,res) => {
+const handleFriendRequest = (req,res) => {
     if(!req || !res || !req.body){
         return;
     }
+
 
     let requestPayload = {
         sender: req.body.sender,
@@ -286,6 +291,7 @@ handleFriendRequest = (req,res) => {
         }).then(() => {
             admin.database().ref("users/"+requestPayload.sender+"/friend_requests_sent/").child(requestPayload.receiver)
             .remove();
+
         });
 
         admin.database().ref("users/"+requestPayload.receiver+"/friends/"+requestPayload.sender)
@@ -294,7 +300,7 @@ handleFriendRequest = (req,res) => {
         }).then(() => {
             admin.database().ref("users/"+requestPayload.receiver+"/friend_requests_received/").child(requestPayload.sender)
             .remove();
-            res.json(RESPONSE_MODALS.friendRequest.accepted);
+            res.json(RESPONSE_MODALS.handlefriendRequest.accepted);
             return;
         });
     } else if(!req.body.accepted){
@@ -302,11 +308,33 @@ handleFriendRequest = (req,res) => {
         .remove();
         admin.database().ref("users/"+requestPayload.receiver+"/friend_requests_received/").child(requestPayload.sender)
             .remove();
-        res.json(RESPONSE_MODALS.friendRequest.rejected);
+        res.json(RESPONSE_MODALS.handlefriendRequest.rejected);
         return;
     }
-
+       
 }
+
+
+const getUserFriends = (req,res) =>{
+    if( !req || !res || !req.query)
+    {
+        res.json(RESPONSE_MODALS.getUserFriends.failed);
+        return 
+    }
+
+    var userName = req.query.username
+
+    admin.database().ref("users/"+userName+"/friends").orderByValue().once("value").then((snap) => {
+       var responseData = snap.val();
+       res.json({
+           ...RESPONSE_MODALS.getUserFriends.success,
+           friends: responseData
+       })
+    })
+    
+}
+
+
 
 exports.initializeDatabase = initializeDatabase;
 exports.loginUser = loginUser;
@@ -318,6 +346,7 @@ exports.userInfo = userInfo;
 exports.friendRequest = friendRequest;
 exports.userStatus = userStatus;
 exports.handleFriendRequest = handleFriendRequest;
+exports.getUserFriends =  getUserFriends;
 
 
 

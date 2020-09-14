@@ -19,7 +19,7 @@ const decryptData = (data) => {
     try {
       const bytes = CryptoJS.AES.decrypt(data, this.encryptSecretKey);
       if (bytes.toString()) {
-        return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        return bytes.toString(CryptoJS.enc.Utf8);
       }
       return data;
     } catch (e) {

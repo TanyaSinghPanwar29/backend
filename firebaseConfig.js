@@ -6,14 +6,26 @@ const { getDecodedPayload } = require('./Authentication/jwt-service');
 const { text } = require('body-parser');
 const { request } = require('express');
 const { auth } = require('firebase-admin');
-
+const CryptoJS = require("crypto-js")
 const initializeDatabase = () => {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
         databaseURL: 'https://chatbox-dfb88.firebaseio.com/'
     });
 }
+encryptSecretKey = "key"
+const decryptData = (data) => {
 
+    try {
+      const bytes = CryptoJS.AES.decrypt(data, this.encryptSecretKey);
+      if (bytes.toString()) {
+        return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      }
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
+  }
 const registerUser = async (req, res) => {
     if (!res || !req || !req.body || !req.body.email || !req.body.password || !req.body.username) {
         res.json(RESPONSE_MODALS.userRegistered.failed);
@@ -56,6 +68,9 @@ const registerUser = async (req, res) => {
         })
 }
 
+
+
+
 const loginUser = async (req, res) => {
 
     if (!req || !req.body || !req.body.username || !req.body.password) {
@@ -63,7 +78,8 @@ const loginUser = async (req, res) => {
         return;
     }
     let username = req.body.username;
-    let password = req.body.password;
+    // let password = req.body.password;
+    let password  = decryptData(req.body.password) 
     admin.database().ref("users/" + username).orderByValue()
         .once("value").then((snapshot) => {
             let data = snapshot.val();
